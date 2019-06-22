@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Configuration;
+﻿using Bucket.Authorize.Abstractions;
+using Bucket.Authorize.Implementation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bucket.Authorize.MySql
@@ -9,17 +9,15 @@ namespace Bucket.Authorize.MySql
         /// <summary>
         /// mysql user scope authorize
         /// </summary>
-        /// <param name="services"></param>
-        /// <param name="configuration"></param>
+        /// <param name="authoriserBuilder"></param>
+        /// <param name="section"></param>
         /// <returns></returns>
-        public static IAuthoriserBuilder UseMySqlAuthorize(this IAuthoriserBuilder authoriserBuilder)
+        public static IAuthoriserBuilder UseMySqlAuthorize(this IAuthoriserBuilder authoriserBuilder, string section = "JwtAuthorize")
         {
-            var config = authoriserBuilder.Configuration.GetSection("JwtAuthorize");
+            var config = authoriserBuilder.Configuration.GetSection(section);
 
             authoriserBuilder.Services.AddSingleton<IPermissionRepository>(sp => new MySqlPermissionRepository(config["MySqlConnectionString"], config["ProjectName"]));
             authoriserBuilder.Services.AddSingleton<IPermissionAuthoriser, ScopesAuthoriser>();
-            authoriserBuilder.Services.AddHostedService<MySqlPermissionPoller>();
-
             return authoriserBuilder;
         }
     }

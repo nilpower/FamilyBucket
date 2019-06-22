@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions.Internal;
 using System;
 using System.Linq;
 using System.Net;
@@ -10,21 +11,21 @@ namespace Bucket.Logging
 {
     public class BucketLogLogger : ILogger
     {
-        private readonly string _projectName;
+        private readonly string _applicationName;
         private readonly string _className;
-        private readonly ILogStore _logStore;
+        private readonly ILoggerDispatcher _loggerDispatcher;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public BucketLogLogger(ILogStore logStore, IHttpContextAccessor httpContextAccessor, string projectName, string className)
+        public BucketLogLogger(ILoggerDispatcher loggerDispatcher, IHttpContextAccessor httpContextAccessor, string applicationName, string className)
         {
-            _logStore = logStore;
-            _projectName = projectName;
+            _loggerDispatcher = loggerDispatcher;
+            _applicationName = applicationName;
             _className = className;
             _httpContextAccessor = httpContextAccessor;
         }
 
         public IDisposable BeginScope<TState>(TState state)
         {
-            return null;
+            return NullScope.Instance;
         }
 
         public bool IsEnabled(LogLevel logLevel)
@@ -70,49 +71,29 @@ namespace Bucket.Logging
             if (!string.IsNullOrEmpty(message)
                 || exception != null)
             {
-                if (_logStore != null)
+                if (_loggerDispatcher != null)
                 {
-                    var url = string.Empty;
-                    var ip = string.Empty;
+                    var localPort = string.Empty;
                     if (_httpContextAccessor != null && _httpContextAccessor.HttpContext != null)
-                    {
-                        ip = GetServerIp(_httpContextAccessor.HttpContext);
-                        url = _httpContextAccessor.HttpContext?.Request?.GetDisplayUrl();
-                    }
+                        localPort = ":" + _httpContextAccessor.HttpContext?.Connection?.LocalPort.ToString();
+                    // 日志长度过长,暂时不采用其他解决方案
                     if (message.Length > 5120)
-                    {
-                        // 日志长度过长,暂时不采用其他解决方案
                         message = Substring2(message, 5120);
-                    }
-                    var model = new LogInfo()
+                    _loggerDispatcher.Dispatch(new LogMessageEntry()
                     {
-                        Id = Guid.NewGuid().ToString("N"),
-
-                        ProjectName = _projectName,
+                        ProjectName = _applicationName,
                         ClassName = _className,
-                        IP = ip,
+                        LocalIp = GetLanIp() + localPort,
                         AddTime = DateTime.Now,
-
                         LogMessage = message,
                         LogType = logLevel.ToString(),
-                        LogTag = url
-                    };
-                    _logStore.Post(model);
+                        LogTag = _httpContextAccessor?.HttpContext?.Request?.GetDisplayUrl(),
+                        TraceHead = _httpContextAccessor?.HttpContext?.Request?.Headers["skyapm"].FirstOrDefault()
+                    });
                 }
                 else
                     Console.WriteLine(message);
             }
-        }
-        /// <summary>
-        /// 服务端Ip地址
-        /// </summary>
-        private string GetServerIp(HttpContext context)
-        {
-            var list = new[] { "127.0.0.1", "::1" };
-            var result = context?.Connection?.LocalIpAddress.ToString();
-            if (string.IsNullOrWhiteSpace(result) || list.Contains(result))
-                result = GetLanIp();
-            return result;
         }
 
         /// <summary>
@@ -120,12 +101,11 @@ namespace Bucket.Logging
         /// </summary>
         private string GetLanIp()
         {
-            foreach (var hostAddress in Dns.GetHostAddresses(Dns.GetHostName()))
-            {
-                if (hostAddress.AddressFamily == AddressFamily.InterNetwork)
-                    return hostAddress.ToString();
-            }
-            return string.Empty;
+            return System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
+                .Select(p => p.GetIPProperties())
+                .SelectMany(p => p.UnicastAddresses)
+                .Where(p => p.Address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(p.Address))
+                .FirstOrDefault()?.Address.ToString();
         }
         /// <summary>
         /// 部分字符串获取

@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
+﻿using Bucket.Authorize.Abstractions;
 using Dapper;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Bucket.Authorize.MySql
 {
@@ -27,7 +28,7 @@ namespace Bucket.Authorize.MySql
                                                                     FROM tb_api_resources AS api 
                                                                     LEFT JOIN tb_role_apis AS roleapi ON api.Id = roleapi.ApiId
                                                                     WHERE AllowScope = 2 AND ProjectName = @ProjectName", new { ProjectName = _projectName });
-                // 平台下所有角色
+                // 所有角色
                 var roleList = await dbContext.QueryAsync<RoleInfo>(@"SELECT Id, `Key` from tb_roles WHERE IsDel=0", new { ProjectName = _projectName });
                 if (apiList.Any())
                 {
