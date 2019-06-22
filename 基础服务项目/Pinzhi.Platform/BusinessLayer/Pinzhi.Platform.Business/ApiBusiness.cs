@@ -9,6 +9,8 @@ using Pinzhi.Platform.Interface;
 using System;
 using Bucket.Utility;
 using Bucket.DbContext;
+using Bucket.DbContext.SqlSugar;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Pinzhi.Platform.Business
 {
@@ -45,7 +47,7 @@ namespace Pinzhi.Platform.Business
             var query = await _dbContext.Queryable<ApiInfo>()
                                  .WhereIF(!input.ProjectKey.IsEmpty(), it => it.ProjectName == input.ProjectKey)
                                  .ToPageListAsync(input.PageIndex, input.PageSize, pageNumber);
-            return new QueryApisOutput { Data = query.Key, CurrentPage = input.PageIndex, Total = query.Value };
+            return new QueryApisOutput { Data = query, CurrentPage = input.PageIndex, Total = query.Count };
         }
         /// <summary>
         /// 设置Api资源

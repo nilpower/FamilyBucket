@@ -21,7 +21,7 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-    <PackageReference Include="sqlSugarCore" Version="4.9.9.7" />
+    <PackageReference Include="sqlSugarCore" Version="5.0.0.8" />
   </ItemGroup>
 
   <ItemGroup>

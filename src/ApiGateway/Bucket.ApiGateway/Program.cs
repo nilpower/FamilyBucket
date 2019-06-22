@@ -1,10 +1,8 @@
 ﻿using Bucket.Logging;
 using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.IO;
 using System.Text;
 
 namespace Bucket.ApiGateway
@@ -22,12 +20,13 @@ namespace Bucket.ApiGateway
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             WebHost.CreateDefaultBuilder(args)
-                   .ConfigureLogging((hostingContext, logging) =>
+                .ConfigureAppConfiguration(config => { config.AddJsonFile("ocelot.json", true, true); }).ConfigureLogging((hostingContext, logging) =>
                    {
                        logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging")).ClearProviders()
                               .AddBucketLog(hostingContext.Configuration.GetValue<string>("Project:Name"));
                    })
                    .UseStartup<Startup>()
+                   .UseUrls("http://*:5000")
                    .Build()
                    .Run();
         }

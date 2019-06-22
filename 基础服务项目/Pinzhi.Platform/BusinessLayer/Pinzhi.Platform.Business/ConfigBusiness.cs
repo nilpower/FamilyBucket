@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using Bucket.Listener.Abstractions;
 using Pinzhi.Platform.Dto.Config;
 using Bucket.DbContext;
+using Bucket.DbContext.SqlSugar;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Pinzhi.Platform.Business
 {
@@ -62,7 +64,7 @@ namespace Pinzhi.Platform.Business
                                 .WhereIF(!string.IsNullOrWhiteSpace(input.AppId), it => it.ConfigAppId == input.AppId)
                                 .WhereIF(!string.IsNullOrWhiteSpace(input.NameSpace), it => it.ConfigNamespaceName == input.NameSpace)
                                 .ToPageListAsync(input.PageIndex, input.PageSize, totalNumber);
-            return new QueryAppConfigListOutput { Data = result.Key, CurrentPage = input.PageIndex, Total = result.Value };
+            return new QueryAppConfigListOutput { Data = result, CurrentPage = input.PageIndex, Total = result.Count };
         }
 
         public async Task<QueryAppListOutput> QueryAppList()
@@ -80,7 +82,7 @@ namespace Pinzhi.Platform.Business
                                 .WhereIF(input.IsPublic == 1, it => it.IsPublic == true)
                                 .WhereIF(input.IsPublic == 0, it => it.IsPublic == false)
                                 .ToPageListAsync(input.PageIndex, input.PageSize, totalNumber);
-            return new QueryAppProjectListOutput { Data = result.Key, CurrentPage = input.PageIndex, Total = totalNumber };
+            return new QueryAppProjectListOutput { Data = result, CurrentPage = input.PageIndex, Total = totalNumber };
         }
 
         public async Task<SetAppConfigInfoOutput> SetAppConfigInfo(SetAppConfigInfoInput input)

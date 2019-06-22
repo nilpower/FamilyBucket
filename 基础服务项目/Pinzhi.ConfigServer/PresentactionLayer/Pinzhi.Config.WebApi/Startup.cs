@@ -48,15 +48,15 @@ namespace Pinzhi.Config.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             // 添加基础设施服务
-            services.AddBucket();
+            services.AddBucketAspNetCore();
             // 添加数据ORM
             services.AddSqlSugarDbContext();
             // 添加事件驱动
             services.AddEventBus(option => { option.UseRabbitMQ(); });
             // 添加事件队列日志
-            services.AddEventLog();
+            services.AddLogEventTransport();
             // 模型映射
-            services.AddAutoMapper();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // 业务注册
             services.AddScoped<IConfigBusniess, ConfigBusniess>();
             // 添加过滤器

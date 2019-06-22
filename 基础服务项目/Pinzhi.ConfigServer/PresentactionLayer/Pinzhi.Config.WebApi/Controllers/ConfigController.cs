@@ -28,7 +28,7 @@ namespace Pinzhi.Config.WebApi.Controllers
         /// <param name="version"></param>
         /// <param name="sign"></param>
         /// <returns></returns>
-        [HttpGet("/configs/{appId}/{namespaceName}")]
+        [HttpGet("/configs/v2/{appId}/{namespaceName}")]
         public async Task<QueryConfigOutput> QueryConfig(string appId, string namespaceName, long version, string env, string sign)
         {
             return await _configBusniess.QueryConfig(new QueryConfigInput { AppId = appId, NamespaceName = namespaceName, Sign = sign, Version = version, Env = env });

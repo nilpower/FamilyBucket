@@ -3,14 +3,14 @@ using Bucket.Core;
 using Bucket.Redis;
 using Pinzhi.Platform.Dto;
 using Pinzhi.Platform.Model;
-using SqlSugar;
 using System;
 using System.Threading.Tasks;
 using Pinzhi.Platform.Interface;
 using Bucket.Utility;
 using System.Collections.Generic;
 using Bucket.Config;
-using Bucket.DbContext;
+using Bucket.DbContext.SqlSugar;
+using Bucket.Utility.Helpers;
 
 namespace Pinzhi.Platform.Business
 {
@@ -25,20 +25,17 @@ namespace Pinzhi.Platform.Business
         private readonly BucketSqlSugarClient _dbContext;
         private readonly RedisClient _redisClient;
         private readonly IMapper _mapper;
-        private readonly IJsonHelper _jsonHelper;
         private readonly IUser _user;
         private readonly IConfig _configCenter;
         public RoleBusiness(BucketSqlSugarClient dbContext,
             IMapper mapper,
             RedisClient redisClient,
-            IJsonHelper jsonHelper,
             IUser user,
             IConfig configCenter)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _redisClient = redisClient;
-            _jsonHelper = jsonHelper;
             _user = user;
             _configCenter = configCenter;
         }
@@ -69,7 +66,7 @@ namespace Pinzhi.Platform.Business
                 var redisList = await redis.StringGetAsync(CacheKeys.RoleAllUseKey);
                 if (!string.IsNullOrWhiteSpace(redisList))
                 {
-                    return new QueryRolesOutput { Data = _jsonHelper.DeserializeObject<List<RoleInfo>>(redisList) };
+                    return new QueryRolesOutput { Data = Json.ToObject<List<RoleInfo>>(redisList) };
                 }
                 else
                 {
@@ -77,7 +74,7 @@ namespace Pinzhi.Platform.Business
                                  .Where(it => it.IsDel == false)
                                  .WhereIF(!input.PlatformKey.IsEmpty(), it => it.PlatformKey == input.PlatformKey)
                                  .ToListAsync();
-                    await redis.StringSetAsync(CacheKeys.RoleAllUseKey, _jsonHelper.SerializeObject(list));
+                    await redis.StringSetAsync(CacheKeys.RoleAllUseKey, Json.ToJson(list));
                 }
             }
             else

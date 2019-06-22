@@ -77,17 +77,17 @@ namespace Bucket.ApiGateway
                 .AddConfigStoredInMySql(Configuration.GetValue<string>("Project:Name")); // 添加MySql配置存储
                                                                                          //.AddDotNettyTransport(); // 添加DotNetty传输
                                                                                          // 添加监控
-            services.AddAppMetrics(x =>
-            {
-                var opt = Configuration.GetSection("AppMetrics").Get<AppMetricsOptions>();
-                x.Enable = opt.Enable;
-                x.App = opt.App;
-                x.ConnectionString = opt.ConnectionString;
-                x.DataBaseName = opt.DataBaseName;
-                x.Env = opt.Env;
-                x.Password = opt.Password;
-                x.UserName = opt.UserName;
-            });
+            //services.AddAppMetrics(x =>
+            //{
+            //    var opt = Configuration.GetSection("AppMetrics").Get<AppMetricsOptions>();
+            //    x.Enable = opt.Enable;
+            //    x.App = opt.App;
+            //    x.ConnectionString = opt.ConnectionString;
+            //    x.DataBaseName = opt.DataBaseName;
+            //    x.Env = opt.Env;
+            //    x.Password = opt.Password;
+            //    x.UserName = opt.UserName;
+            //});
             // 添加首字母大写
             services.AddMvc().AddJsonOptions(options => { options.SerializerSettings.ContractResolver = new DefaultContractResolver(); })
                 .SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_2);
@@ -135,7 +135,7 @@ namespace Bucket.ApiGateway
             // 使用跨域
             app.UseCors("CorsPolicy");
             // 使用监控
-            app.UseAppMetrics();
+            //app.UseAppMetrics();
             // 网关扩展中间件配置
             var configuration = new OcelotPipelineConfiguration()
             {

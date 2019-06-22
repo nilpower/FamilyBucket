@@ -12,6 +12,8 @@ using Bucket.Utility;
 using System.Collections.Generic;
 using Bucket.Utility.Helpers;
 using Bucket.DbContext;
+using Bucket.DbContext.SqlSugar;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Pinzhi.Platform.Business
 {
@@ -60,8 +62,8 @@ namespace Pinzhi.Platform.Business
                 .WhereIF(!input.Mobile.IsEmpty(), (u, urole) => u.Mobile == input.Mobile)
                 .Select((u, urole) => new QueryUserDTO { Id = u.Id, Mobile = u.Mobile, RealName = u.RealName, State = u.State, UpdateTime = u.UpdateTime, UserName = u.UserName, Email = u.Email })
                 .ToPageListAsync(input.PageIndex, input.PageSize, totalNumber);
-                list = query.Key;
-                totalNumber = query.Value;
+                list = query;
+                totalNumber = query.Count;
             }
             else if (!input.PlatformKey.IsEmpty())
             {
@@ -78,8 +80,8 @@ namespace Pinzhi.Platform.Business
                 .GroupBy((u, urole) => u.Id)
                 .Select((u, urole) => new QueryUserDTO { Id = u.Id, Mobile = u.Mobile, RealName = u.RealName, State = u.State, UpdateTime = u.UpdateTime, UserName = u.UserName, Email = u.Email })
                 .ToPageListAsync(input.PageIndex, input.PageSize, totalNumber);
-                list = query.Key;
-                totalNumber = query.Value;
+                list = query;
+                totalNumber = query.Count;
             }
             else
             {
@@ -90,8 +92,8 @@ namespace Pinzhi.Platform.Business
                 .WhereIF(!input.Mobile.IsEmpty(), f => f.Mobile == input.Mobile)
                 .Select(u => new QueryUserDTO { Id = u.Id, Mobile = u.Mobile, RealName = u.RealName, State = u.State, UpdateTime = u.UpdateTime, UserName = u.UserName, Email = u.Email })
                 .ToPageListAsync(input.PageIndex, input.PageSize, totalNumber);
-                list = query.Key;
-                totalNumber = query.Value;
+                list = query;
+                totalNumber = query.Count;
             }
             var canUseRoleList = await _roleBusiness.QueryRoles(new QueryRolesInput());
             var canUseRole = canUseRoleList.Data as List<RoleInfo>;

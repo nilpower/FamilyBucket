@@ -177,16 +177,16 @@ namespace Bucket.DbContext.SqlSugar
         {
             int count = 0;
             var result = await DbContext.Queryable<T>().Where(whereExpression).ToPageListAsync(page.PageIndex, page.PageSize, count);
-            page.PageCount = result.Value;
-            return result.Key;
+            page.PageCount = result.Count;
+            return result;
         }
 
         public async Task<List<T>> GetPageListAsync(Expression<Func<T, bool>> whereExpression, PageModel page, Expression<Func<T, object>> orderByExpression = null, OrderByType orderByType = OrderByType.Asc)
         {
             int count = 0;
             var result = await DbContext.Queryable<T>().OrderByIF(orderByExpression != null, orderByExpression, orderByType).Where(whereExpression).ToPageListAsync(page.PageIndex, page.PageSize, count);
-            page.PageCount = result.Value;
-            return result.Key;
+            page.PageCount = result.Count;
+            return result;
         }
 
         public T GetSingle(Expression<Func<T, bool>> whereExpression)

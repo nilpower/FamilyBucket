@@ -13,6 +13,7 @@ using Bucket.Config;
 using System.Linq;
 using System.Collections.Generic;
 using Bucket.DbContext;
+using Bucket.DbContext.SqlSugar;
 using SqlSugar;
 
 namespace Pinzhi.Identity.Business.Auth
@@ -22,10 +23,10 @@ namespace Pinzhi.Identity.Business.Auth
         private readonly IAuthRepository _authRepository;
         private readonly IConfig _config;
         private readonly ILogger<AuthBusiness> _logger;
-        private readonly IDbRepository<UserInfo> _userDbRepository;
+        private readonly ISqlSugarDbRepository<UserInfo> _userDbRepository;
         private readonly RedisClient _redisClient;
 
-        public AuthBusiness(IAuthRepository authRepository, IConfig config, ILogger<AuthBusiness> logger, IDbRepository<UserInfo> userDbRepository, RedisClient redisClient)
+        public AuthBusiness(IAuthRepository authRepository, IConfig config, ILogger<AuthBusiness> logger, ISqlSugarDbRepository<UserInfo> userDbRepository, RedisClient redisClient)
         {
             _authRepository = authRepository;
             _config = config;
@@ -56,7 +57,8 @@ namespace Pinzhi.Identity.Business.Auth
             if (userInfo.Password != Encrypt.SHA256(input.Password + userInfo.Salt))
                 throw new BucketException("GO_4009", "账号或密码错误");
             // 用户角色
-            var roleList = await _userDbRepository.DbContext.Queryable<RoleInfo, UserRoleInfo>((role, urole) => new object[] { JoinType.Inner, role.Id == urole.RoleId })
+            //_userDbRepository.AsQueryable().Context.Queryable<>()
+            var roleList = await _userDbRepository.AsQueryable().Context.Queryable<RoleInfo, UserRoleInfo>((role, urole) => new object[] { JoinType.Inner, role.Id == urole.RoleId })
                  .Where((role, urole) => urole.Uid == userInfo.Id)
                  .Where((role, urole) => role.IsDel == false)
                  .Select((role, urole) => new { role.Key })

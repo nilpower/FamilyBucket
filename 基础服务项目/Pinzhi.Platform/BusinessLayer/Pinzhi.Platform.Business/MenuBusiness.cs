@@ -8,7 +8,7 @@ using System.Linq;
 using System;
 using System.Threading.Tasks;
 using Pinzhi.Platform.Interface;
-using Bucket.DbContext;
+using Bucket.DbContext.SqlSugar;
 
 namespace Pinzhi.Platform.Business
 {
@@ -23,18 +23,15 @@ namespace Pinzhi.Platform.Business
         private readonly BucketSqlSugarClient _dbContext;
         private readonly RedisClient _redisClient;
         private readonly IMapper _mapper;
-        private readonly IJsonHelper _jsonHelper;
         private readonly IUser _user;
         public MenuBusiness(BucketSqlSugarClient dbContext, 
             IMapper mapper, 
             RedisClient redisClient, 
-            IJsonHelper jsonHelper,
             IUser user)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _redisClient = redisClient;
-            _jsonHelper = jsonHelper;
             _user = user;
         }
         /// <summary>

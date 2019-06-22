@@ -7,17 +7,18 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Bucket.DbContext;
+using Bucket.DbContext.SqlSugar;
 
 namespace Pinzhi.Identity.Business
 {
     public class ThirdBusiness : IThirdBusiness
     {
-        private readonly IDbRepository<ThirdOAuthInfo> _oauthDbRepository;
+        private readonly ISqlSugarDbRepository<ThirdOAuthInfo> _oauthDbRepository;
         private readonly IUser _user;
         private readonly IWxRepository _wxRepository;
         private readonly IAuthRepository _authRepository;
 
-        public ThirdBusiness(IDbRepository<ThirdOAuthInfo> oauthDbRepository, IUser user, IWxRepository wxRepository, IAuthRepository authRepository)
+        public ThirdBusiness(ISqlSugarDbRepository<ThirdOAuthInfo> oauthDbRepository, IUser user, IWxRepository wxRepository, IAuthRepository authRepository)
         {
             _oauthDbRepository = oauthDbRepository;
             _user = user;

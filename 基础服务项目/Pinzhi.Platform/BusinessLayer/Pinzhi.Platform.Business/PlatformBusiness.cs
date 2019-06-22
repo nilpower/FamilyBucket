@@ -10,6 +10,8 @@ using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Bucket.DbContext.SqlSugar;
+using Bucket.Utility.Helpers;
 
 namespace Pinzhi.Platform.Business
 {
@@ -23,15 +25,13 @@ namespace Pinzhi.Platform.Business
         /// </summary>
         private readonly BucketSqlSugarClient _dbContext;
         private readonly IMapper _mapper;
-        private readonly IJsonHelper _jsonHelper;
         private readonly IConfig _configCenter;
         private readonly RedisClient _redisClient;
-        public PlatformBusiness(BucketSqlSugarClient dbContext, IMapper mapper,RedisClient redisClient,IJsonHelper jsonHelper, IConfig configCenter)
+        public PlatformBusiness(BucketSqlSugarClient dbContext, IMapper mapper,RedisClient redisClient, IConfig configCenter)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _redisClient = redisClient;
-            _jsonHelper = jsonHelper;
             _configCenter = configCenter;
         }
         /// <summary>
@@ -44,12 +44,12 @@ namespace Pinzhi.Platform.Business
             var redisList = await redis.StringGetAsync(CacheKeys.PlatformKey);
             if (!string.IsNullOrWhiteSpace(redisList))
             {
-                return new QueryPlatformsOutput { Data = _jsonHelper.DeserializeObject<List<PlatformInfo>>(redisList) };
+                return new QueryPlatformsOutput { Data = Json.ToObject<List<PlatformInfo>>(redisList) };
             }
             else
             {
                 var list = await _dbContext.Queryable<PlatformInfo>().OrderBy(it => it.SortId, OrderByType.Asc).ToListAsync();
-                await redis.StringSetAsync(CacheKeys.PlatformKey, _jsonHelper.SerializeObject(list));
+                await redis.StringSetAsync(CacheKeys.PlatformKey, Json.ToJson(list));
                 return new QueryPlatformsOutput { Data = list };
             }
         }

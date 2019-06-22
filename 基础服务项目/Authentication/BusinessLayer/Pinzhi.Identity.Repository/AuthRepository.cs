@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using Pinzhi.Identity.Dto.Udc;
 using System.Linq;
 using Bucket.Authorize;
+using Bucket.Authorize.Abstractions;
 
 namespace Pinzhi.Identity.Repository
 {

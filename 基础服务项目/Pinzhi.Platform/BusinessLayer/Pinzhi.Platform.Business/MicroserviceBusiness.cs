@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bucket.Config;
 using Bucket.DbContext;
+using Bucket.DbContext.SqlSugar;
 using Bucket.Exceptions;
 using Bucket.Redis;
 using Bucket.ServiceDiscovery;
@@ -22,13 +23,13 @@ namespace Pinzhi.Platform.Interface
     {
         private readonly IServiceDiscovery _serviceDiscovery;
         private readonly IConfig _config;
-        private readonly IDbRepository<ApiGatewayConfigurationInfo> _configDbRepository;
-        private readonly IDbRepository<ApiGatewayReRouteInfo> _routeDbRepository;
+        private readonly ISqlSugarDbRepository<ApiGatewayConfigurationInfo> _configDbRepository;
+        private readonly ISqlSugarDbRepository<ApiGatewayReRouteInfo> _routeDbRepository;
         private readonly RedisClient _redisClient;
         public MicroserviceBusiness(IServiceDiscovery serviceDiscovery, 
-            IConfig config, 
-            IDbRepository<ApiGatewayConfigurationInfo> configDbRepository, 
-            IDbRepository<ApiGatewayReRouteInfo> routeDbRepository, 
+            IConfig config,
+            ISqlSugarDbRepository<ApiGatewayConfigurationInfo> configDbRepository,
+            ISqlSugarDbRepository<ApiGatewayReRouteInfo> routeDbRepository, 
             RedisClient redisClient)
         {
             _serviceDiscovery = serviceDiscovery;
@@ -127,7 +128,7 @@ namespace Pinzhi.Platform.Interface
                                                       .WhereIF(input.GatewayId > 0, it => it.GatewayId == input.GatewayId)
                                                       .WhereIF(input.State > -1, it => it.State == input.State)
                                                       .ToPageListAsync(input.PageIndex, input.PageSize, count);
-            return new QueryApiGatewayReRouteListOutput { CurrentPage = input.PageIndex, Total = listResult.Value, Data = listResult.Key };
+            return new QueryApiGatewayReRouteListOutput { CurrentPage = input.PageIndex, Total = listResult.Count, Data = listResult };
         }
         /// <summary>
         /// 设置网关路由

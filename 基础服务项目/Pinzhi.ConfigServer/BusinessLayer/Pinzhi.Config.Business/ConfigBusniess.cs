@@ -9,6 +9,8 @@ using Bucket.Utility;
 using Pinzhi.Config.Interface;
 using System;
 using Bucket.DbContext;
+using Bucket.DbContext.SqlSugar;
+using Bucket.Config.Utils;
 
 namespace Pinzhi.Config.Business
 {
@@ -42,8 +44,9 @@ namespace Pinzhi.Config.Business
             var project = await _dbContext.Queryable<AppInfo>().Where(it => it.AppId == input.AppId).FirstAsync();
             if (project == null)
                 throw new BucketException("config_003", "项目不存在");
-            var signstr = $"appId={project.AppId}&appSecret={project.Secret}&namespaceName={input.NamespaceName}";
+            var signstr = $"version={input.Version}&env={input.Env}&appId={project.AppId}&appSecret={project.Secret}&namespaceName={input.NamespaceName}";
             var sign = Bucket.Utility.Helpers.Encrypt.SHA256(signstr);
+            sign = SecureHelper.SHA256(signstr);
             if (sign.ToLower() != input.Sign)
                 throw new BucketException("config_004", "签名错误");
             // 环境库

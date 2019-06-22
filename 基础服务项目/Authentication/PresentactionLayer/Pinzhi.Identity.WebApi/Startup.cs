@@ -1,18 +1,13 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-
-using SqlSugar;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
 using Autofac;
@@ -23,20 +18,17 @@ using Bucket.Utility;
 using Bucket.ErrorCode.Extensions;
 using Bucket.Config.Extensions;
 using Bucket.EventBus.Extensions;
-using Bucket.EventBus.RabbitMQ;
 using Bucket.ServiceDiscovery.Extensions;
-using Bucket.ServiceDiscovery.Consul;
 using Bucket.AspNetCore.Extensions;
 using Bucket.AspNetCore.Filters;
-using Bucket.Tracing.Extensions;
-using Bucket.Tracing.Events;
 using Bucket.Logging;
 using Bucket.Logging.Events;
-using Bucket.Authorize;
+using Bucket.Authorize.Extensions;
 using Bucket.EventBus.RabbitMQ.Extensions;
 using Bucket.ServiceDiscovery.Consul.Extensions;
 using Bucket.HostedService.AspNetCore;
 using Bucket.Config.HostedService;
+using Bucket.DbContext.SqlSugar;
 
 namespace Pinzhi.Identity.WebApi
 {
@@ -69,7 +61,7 @@ namespace Pinzhi.Identity.WebApi
             // 添加授权认证
             services.AddTokenJwtAuthorize(Configuration);
             // 添加基础设施服务
-            services.AddBucket();
+            services.AddBucketAspNetCore();
             // 添加数据ORM
             services.AddSqlSugarDbContext();
             // 添加错误码服务
@@ -81,12 +73,12 @@ namespace Pinzhi.Identity.WebApi
             // 添加服务发现
             services.AddServiceDiscovery(builder => { builder.UseConsul(); });
             // 添加事件队列日志
-            services.AddEventLog();
+            services.AddLogEventTransport();
             // 添加全局定时服务
             services.AddBucketHostedService(builder => { builder.AddConfig(); });
             // 添加链路追踪
-            services.AddTracer(Configuration);
-            services.AddEventTrace();
+            //services.AddTracer(Configuration);
+            //services.AddEventTrace();
             // 添加过滤器
             services.AddMvc(options => { options.Filters.Add(typeof(WebApiActionFilterAttribute)); }).AddJsonOptions(options =>
             {
@@ -114,7 +106,7 @@ namespace Pinzhi.Identity.WebApi
             AutofacContainer = autofac_builder.Build();
             return new AutofacServiceProvider(AutofacContainer);
         }
-        /// <summary>
+
         /// <summary>
         /// 配置请求管道
         /// </summary>
@@ -196,7 +188,7 @@ namespace Pinzhi.Identity.WebApi
                     .AsImplementedInterfaces()
                     .InstancePerLifetimeScope();
                 // 数据仓储泛型注册
-                builder.RegisterGeneric(typeof(SqlSugarRepository<>)).As(typeof(IDbRepository<>))
+                builder.RegisterGeneric(typeof(SqlSugarDbRepository<>)).As(typeof(ISqlSugarDbRepository<>))
                     .InstancePerLifetimeScope();
             }
         }

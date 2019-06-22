@@ -40,8 +40,8 @@ using Bucket.ServiceDiscovery.Extensions;
 using Bucket.ServiceDiscovery.Consul.Extensions;
 using Bucket.AspNetCore.Extensions;
 using Bucket.AspNetCore.Filters;
-using Bucket.Tracing.Extensions;
-using Bucket.Tracing.Events;
+using Bucket.Authorize.Extensions;
+using Bucket.DbContext.SqlSugar;
 
 namespace Pinzhi.Platform.WebApi
 {
@@ -72,9 +72,10 @@ namespace Pinzhi.Platform.WebApi
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             // 添加认证+MySql权限认证
-            services.AddApiJwtAuthorize(Configuration).UseAuthoriser(services, builder => { builder.UseMySqlAuthorize(); });
+            services.AddApiJwtAuthorize(Configuration)
+                .UseAuthoriser(builder => { builder.UseMySqlAuthorize(); });
             // 添加基础设施服务
-            services.AddBucket();
+            services.AddBucketAspNetCore();
             // 添加数据ORM
             services.AddSqlSugarDbContext();
             // 添加错误码服务
@@ -88,10 +89,10 @@ namespace Pinzhi.Platform.WebApi
             // 添加服务路由
             services.AddLoadBalancer();
             // 添加事件队列日志
-            services.AddEventLog();
+            services.AddLogEventTransport();
             // 添加链路追踪
-            services.AddTracer(Configuration);
-            services.AddEventTrace();
+            //services.AddTracer(Configuration);
+            //services.AddEventTrace();
             // 添加模型映射,需要映射配置文件(考虑到性能未使用自动映射)
             services.AddAutoMapper();
             // 添加过滤器
@@ -115,13 +116,15 @@ namespace Pinzhi.Platform.WebApi
             // 添加工具
             services.AddUtil();
             // 添加应用监听
-            services.AddListener(builder => {
+            services.AddListener(builder =>
+            {
                 builder.UseRedis();
                 // builder.UseZookeeper();
                 builder.AddAuthorize().AddConfig().AddErrorCode();
             });
             // 添加全局启动任务
-            services.AddBucketHostedService(builder => {
+            services.AddBucketHostedService(builder =>
+            {
                 builder.AddAuthorize().AddConfig().AddErrorCode();
             });
             // 添加HttpClient管理
@@ -151,7 +154,7 @@ namespace Pinzhi.Platform.WebApi
                     .AsImplementedInterfaces()
                     .InstancePerLifetimeScope();
                 // 数据仓储泛型注册
-                builder.RegisterGeneric(typeof(SqlSugarRepository<>)).As(typeof(IDbRepository<>))
+                builder.RegisterGeneric(typeof(SqlSugarDbRepository<>)).As(typeof(ISqlSugarDbRepository<>))
                     .InstancePerLifetimeScope();
             }
         }
@@ -173,7 +176,8 @@ namespace Pinzhi.Platform.WebApi
         private void ConfigSwagger(IApplicationBuilder app)
         {
             app.UseSwagger();
-            app.UseSwaggerUI(c => {
+            app.UseSwaggerUI(c =>
+            {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "api v1");
             });
         }
@@ -198,7 +202,8 @@ namespace Pinzhi.Platform.WebApi
         /// </summary>
         private void ConfigRoute(IApplicationBuilder app)
         {
-            app.UseMvc(routes => {
+            app.UseMvc(routes =>
+            {
                 routes.MapRoute("areaRoute", "view/{area:exists}/{controller}/{action=Index}/{id?}");
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
                 routes.MapSpaFallbackRoute("spa-fallback", new { controller = "Home", action = "Index" });
