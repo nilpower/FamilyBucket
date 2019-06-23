@@ -211,6 +211,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pinzhi.Platform.Model", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pinzhi.Platform.WebApi", "..\基础服务项目\Pinzhi.Platform\PresentactionLayer\Pinzhi.Platform.WebApi\Pinzhi.Platform.WebApi.csproj", "{868BE384-FA98-4CF1-95BB-61388E498CD4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tracing", "Tracing", "{1871C2E7-4633-4946-BB70-BB7717F2C273}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -601,6 +603,7 @@ Global
 		{FF05433C-FA73-437C-91DD-C9E258E48DBF} = {48942EB3-278E-48C5-8F36-CF6775A4AE79}
 		{DF72B266-79B3-4BB9-A599-BBED28364CD6} = {48942EB3-278E-48C5-8F36-CF6775A4AE79}
 		{868BE384-FA98-4CF1-95BB-61388E498CD4} = {48942EB3-278E-48C5-8F36-CF6775A4AE79}
+		{1871C2E7-4633-4946-BB70-BB7717F2C273} = {D7BAC7F7-413F-4C18-8F57-F171410F3C93}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CA0759A0-104C-4213-9D48-D4F7E3E74EEB}
