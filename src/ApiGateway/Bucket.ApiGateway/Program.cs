@@ -26,7 +26,7 @@ namespace Bucket.ApiGateway
                               .AddBucketLog(hostingContext.Configuration.GetValue<string>("Project:Name"));
                    })
                    .UseStartup<Startup>()
-                   .UseUrls("http://*:5000")
+                   .UseUrls("http://*:5010")
                    .Build()
                    .Run();
         }
